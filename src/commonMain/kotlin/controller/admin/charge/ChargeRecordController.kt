@@ -1,0 +1,45 @@
+package controller.admin.charge
+
+import controller.admin.charge.dto.ChargeRecordVO
+import logic.ChargeLogic
+import model.ChargeRecord
+import neton.core.annotations.Controller
+import neton.core.annotations.Get
+import neton.core.annotations.Post
+import neton.core.annotations.Delete
+import neton.core.annotations.Body
+import neton.core.annotations.PathVariable
+import neton.core.annotations.Query
+
+@Controller("/platform/charge-record")
+class ChargeRecordController(private val chargeLogic: ChargeLogic) {
+
+    @Post("/create")
+    suspend fun create(@Body record: ChargeRecord): Long {
+        return chargeLogic.createChargeRecord(record)
+    }
+
+    @Delete("/delete/{id}")
+    suspend fun delete(@PathVariable id: Long) {
+        chargeLogic.deleteChargeRecord(id)
+    }
+
+    @Delete("/delete-list")
+    suspend fun deleteList(@Query ids: String) {
+        val idList = ids.split(",").mapNotNull { it.trim().toLongOrNull() }
+        chargeLogic.deleteChargeRecordByIds(idList)
+    }
+
+    @Get("/get/{id}")
+    suspend fun get(@PathVariable id: Long): ChargeRecord? {
+        return chargeLogic.getChargeRecord(id)
+    }
+
+    @Get("/page")
+    suspend fun page(
+        @Query pageNo: Int = 1,
+        @Query pageSize: Int = 20,
+        @Query clientId: Long? = null,
+        @Query apiId: Long? = null
+    ) = chargeLogic.pageCharges(pageNo, pageSize, clientId, apiId)
+}
