@@ -1,6 +1,8 @@
 package controller.admin.client
 
+import controller.admin.client.dto.CreateClientApiRequest
 import controller.admin.client.dto.ClientApiVO
+import controller.admin.client.dto.UpdateClientApiRequest
 import logic.ApiLogic
 import model.ClientApi
 import neton.core.annotations.Controller
@@ -16,13 +18,28 @@ import neton.core.annotations.Query
 class ClientApiController(private val apiLogic: ApiLogic) {
 
     @Post("/create")
-    suspend fun create(@Body clientApi: ClientApi): Long {
-        return apiLogic.createClientApi(clientApi)
+    suspend fun create(@Body request: CreateClientApiRequest): Long {
+        return apiLogic.createClientApi(
+            ClientApi(
+                clientId = request.clientId,
+                apiId = request.apiId,
+                customPrice = request.customPrice,
+                status = request.status
+            )
+        )
     }
 
     @Put("/update")
-    suspend fun update(@Body clientApi: ClientApi) {
-        apiLogic.updateClientApi(clientApi)
+    suspend fun update(@Body request: UpdateClientApiRequest) {
+        apiLogic.updateClientApi(
+            ClientApi(
+                id = request.id,
+                clientId = request.clientId,
+                apiId = request.apiId,
+                customPrice = request.customPrice,
+                status = request.status
+            )
+        )
     }
 
     @Delete("/delete/{id}")
@@ -47,8 +64,15 @@ class ClientApiController(private val apiLogic: ApiLogic) {
     }
 
     @Post("/createAssociation")
-    suspend fun createAssociation(@Body clientApi: ClientApi): Long {
-        return apiLogic.createClientApi(clientApi)
+    suspend fun createAssociation(@Body request: CreateClientApiRequest): Long {
+        return apiLogic.createClientApi(
+            ClientApi(
+                clientId = request.clientId,
+                apiId = request.apiId,
+                customPrice = request.customPrice,
+                status = request.status
+            )
+        )
     }
 
     @Get("/page")

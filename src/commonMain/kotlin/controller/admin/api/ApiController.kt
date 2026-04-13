@@ -1,6 +1,8 @@
 package controller.admin.api
 
 import controller.admin.api.dto.ApiVO
+import controller.admin.api.dto.CreateApiRequest
+import controller.admin.api.dto.UpdateApiRequest
 import logic.ApiLogic
 import model.Api
 import neton.core.annotations.Controller
@@ -16,13 +18,30 @@ import neton.core.annotations.Query
 class ApiController(private val apiLogic: ApiLogic) {
 
     @Post("/create")
-    suspend fun create(@Body api: Api): Long {
-        return apiLogic.create(api)
+    suspend fun create(@Body request: CreateApiRequest): Long {
+        return apiLogic.create(
+            Api(
+                name = request.name,
+                code = request.code,
+                description = request.description,
+                price = request.price,
+                status = request.status
+            )
+        )
     }
 
     @Put("/update")
-    suspend fun update(@Body api: Api) {
-        apiLogic.update(api)
+    suspend fun update(@Body request: UpdateApiRequest) {
+        apiLogic.update(
+            Api(
+                id = request.id,
+                name = request.name,
+                code = request.code,
+                description = request.description,
+                price = request.price,
+                status = request.status
+            )
+        )
     }
 
     @Delete("/delete/{id}")

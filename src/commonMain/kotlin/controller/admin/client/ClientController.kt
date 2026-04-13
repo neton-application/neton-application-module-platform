@@ -1,6 +1,8 @@
 package controller.admin.client
 
+import controller.admin.client.dto.CreateClientRequest
 import controller.admin.client.dto.ClientVO
+import controller.admin.client.dto.UpdateClientRequest
 import logic.ClientLogic
 import model.Client
 import neton.core.annotations.Controller
@@ -16,13 +18,34 @@ import neton.core.annotations.Query
 class ClientController(private val clientLogic: ClientLogic) {
 
     @Post("/create")
-    suspend fun create(@Body client: Client): Long {
-        return clientLogic.create(client)
+    suspend fun create(@Body request: CreateClientRequest): Long {
+        return clientLogic.create(
+            Client(
+                name = request.name,
+                appId = request.appId,
+                appSecret = request.appSecret,
+                status = request.status,
+                remark = request.remark,
+                contactName = request.contactName,
+                contactMobile = request.contactMobile
+            )
+        )
     }
 
     @Put("/update")
-    suspend fun update(@Body client: Client) {
-        clientLogic.update(client)
+    suspend fun update(@Body request: UpdateClientRequest) {
+        clientLogic.update(
+            Client(
+                id = request.id,
+                name = request.name,
+                appId = request.appId,
+                appSecret = request.appSecret,
+                status = request.status,
+                remark = request.remark,
+                contactName = request.contactName,
+                contactMobile = request.contactMobile
+            )
+        )
     }
 
     @Delete("/delete/{id}")

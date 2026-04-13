@@ -1,5 +1,6 @@
 package controller.admin.log
 
+import controller.admin.log.dto.CreatePlatformLogRequest
 import controller.admin.log.dto.PlatformLogVO
 import logic.ChargeLogic
 import model.PlatformLog
@@ -15,8 +16,19 @@ import neton.core.annotations.Query
 class LogController(private val chargeLogic: ChargeLogic) {
 
     @Post("/create")
-    suspend fun create(@Body platformLog: PlatformLog): Long {
-        return chargeLogic.createLog(platformLog)
+    suspend fun create(@Body request: CreatePlatformLogRequest): Long {
+        return chargeLogic.createLog(
+            PlatformLog(
+                clientId = request.clientId,
+                apiId = request.apiId,
+                requestUrl = request.requestUrl,
+                requestParams = request.requestParams,
+                responseBody = request.responseBody,
+                userIp = request.userIp,
+                duration = request.duration,
+                resultCode = request.resultCode
+            )
+        )
     }
 
     @Delete("/delete/{id}")

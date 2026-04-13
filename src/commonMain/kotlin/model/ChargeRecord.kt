@@ -16,7 +16,7 @@ data class ChargeRecord(
     val apiCode: String? = null,
     val price: Long = 0,
     val amount: Long = 0,
-    val status: Int = 0,
+    val status: Int = 1,
     @CreatedAt
     val createdAt: String? = null
 )

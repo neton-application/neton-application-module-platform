@@ -87,7 +87,7 @@ class PlatformOrderController(
                     code = 0,
                     message = "success",
                     orderId = record.orderId,
-                    status = if (record.status == 0) "pending" else "completed",
+                    status = if (record.status == 1) "completed" else "pending",
                     amount = record.amount
                 )
             }

@@ -1,6 +1,8 @@
 package controller.admin.stat
 
+import controller.admin.stat.dto.CreatePlatformStatRequest
 import controller.admin.stat.dto.PlatformStatVO
+import controller.admin.stat.dto.UpdatePlatformStatRequest
 import logic.ChargeLogic
 import model.PlatformStat
 import neton.core.annotations.Controller
@@ -16,13 +18,30 @@ import neton.core.annotations.Query
 class StatController(private val chargeLogic: ChargeLogic) {
 
     @Post("/create")
-    suspend fun create(@Body stat: PlatformStat): Long {
-        return chargeLogic.createStat(stat)
+    suspend fun create(@Body request: CreatePlatformStatRequest): Long {
+        return chargeLogic.createStat(
+            PlatformStat(
+                clientId = request.clientId,
+                apiId = request.apiId,
+                callCount = request.callCount,
+                totalCharge = request.totalCharge,
+                statDate = request.statDate
+            )
+        )
     }
 
     @Put("/update")
-    suspend fun update(@Body stat: PlatformStat) {
-        chargeLogic.updateStat(stat)
+    suspend fun update(@Body request: UpdatePlatformStatRequest) {
+        chargeLogic.updateStat(
+            PlatformStat(
+                id = request.id,
+                clientId = request.clientId,
+                apiId = request.apiId,
+                callCount = request.callCount,
+                totalCharge = request.totalCharge,
+                statDate = request.statDate
+            )
+        )
     }
 
     @Delete("/delete/{id}")

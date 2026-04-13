@@ -1,5 +1,6 @@
 package controller.admin.charge
 
+import controller.admin.charge.dto.CreateChargeRecordRequest
 import controller.admin.charge.dto.ChargeRecordVO
 import logic.ChargeLogic
 import model.ChargeRecord
@@ -15,8 +16,18 @@ import neton.core.annotations.Query
 class ChargeRecordController(private val chargeLogic: ChargeLogic) {
 
     @Post("/create")
-    suspend fun create(@Body record: ChargeRecord): Long {
-        return chargeLogic.createChargeRecord(record)
+    suspend fun create(@Body request: CreateChargeRecordRequest): Long {
+        return chargeLogic.createChargeRecord(
+            ChargeRecord(
+                clientId = request.clientId,
+                apiId = request.apiId,
+                orderId = request.orderId,
+                apiCode = request.apiCode,
+                price = request.price,
+                amount = request.amount,
+                status = request.status
+            )
+        )
     }
 
     @Delete("/delete/{id}")

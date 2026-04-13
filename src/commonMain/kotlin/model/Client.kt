@@ -15,7 +15,7 @@ data class Client(
     val name: String,
     val appId: String,
     val appSecret: String,
-    val status: Int = 0,
+    val status: Int = 1,
     val remark: String? = null,
     val contactName: String? = null,
     val contactMobile: String? = null,
