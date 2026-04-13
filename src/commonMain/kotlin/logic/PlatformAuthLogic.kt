@@ -17,7 +17,7 @@ class PlatformAuthLogic(
         return ClientTable.oneWhere {
             and(
                 Client::appId eq appId,
-                Client::status eq 0,
+                Client::status eq 1,
                 Client::deleted eq 0
             )
         }

@@ -27,6 +27,12 @@ class ChargeLogic(
         return ChargeRecordTable.get(id)
     }
 
+    suspend fun getChargeRecordByOrderId(orderId: String): ChargeRecord? {
+        return ChargeRecordTable.oneWhere {
+            ChargeRecord::orderId eq orderId
+        }
+    }
+
     suspend fun deleteChargeRecord(id: Long) {
         ChargeRecordTable.destroy(id)
         log.info("Deleted charge record with id: $id")

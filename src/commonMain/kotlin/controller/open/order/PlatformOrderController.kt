@@ -10,7 +10,6 @@ import neton.core.annotations.Controller
 import neton.core.annotations.Get
 import neton.core.annotations.Post
 import neton.core.annotations.Body
-import neton.database.dsl.*
 import kotlin.time.Clock
 
 @Serializable
@@ -73,15 +72,10 @@ class PlatformOrderController(
             return OrderQueryResponse(code = 403, message = "Signature verification failed")
         }
 
-        // Query charge records for this client and order
-        if (orderId != null) {
-            val record = ChargeRecordTable.oneWhere {
-                and(
-                    ChargeRecord::clientId eq client.id,
-                    ChargeRecord::orderId eq orderId
-                )
-            }
-
+        // Query charge records via ChargeLogic
+        val charge = chargeLogic
+        if (charge != null && orderId != null) {
+            val record = charge.getChargeRecordByOrderId(orderId)
             if (record != null) {
                 return OrderQueryResponse(
                     code = 0,
@@ -117,22 +111,29 @@ class PlatformOrderController(
             return OrderCreateResponse(code = 403, message = "Signature verification failed")
         }
 
-        // Create a charge record for this API call
-        val orderId = "ORD_${client.appId}_${Clock.System.now().toEpochMilliseconds()}"
-        val chargeRecord = ChargeRecord(
-            clientId = client.id,
-            apiId = 0,  // Will be resolved by API code lookup
-            orderId = orderId,
-            apiCode = request.productCode,
-            amount = 0,  // Will be calculated based on API pricing
-            status = 0
-        )
-        ChargeRecordTable.insert(chargeRecord)
+        // Create a charge record via ChargeLogic
+        val charge = chargeLogic
+        if (charge != null) {
+            val orderId = "ORD_${client.appId}_${Clock.System.now().toEpochMilliseconds()}"
+            charge.createChargeRecord(ChargeRecord(
+                clientId = client.id,
+                apiId = 0,
+                orderId = orderId,
+                apiCode = request.productCode,
+                amount = 0,
+                status = 0
+            ))
+
+            return OrderCreateResponse(
+                code = 0,
+                message = "success",
+                orderId = orderId
+            )
+        }
 
         return OrderCreateResponse(
-            code = 0,
-            message = "success",
-            orderId = orderId
+            code = 503,
+            message = "Charge service not available"
         )
     }
 }
