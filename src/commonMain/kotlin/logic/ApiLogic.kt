@@ -32,8 +32,7 @@ class ApiLogic(
     }
 
     suspend fun deleteByIds(ids: List<Long>) {
-        ids.forEach { ApiTable.destroy(it) }
-        log.info("Deleted apis with ids: $ids")
+        ids.forEach { delete(it) }
     }
 
     suspend fun get(id: Long): Api? {
@@ -86,8 +85,7 @@ class ApiLogic(
     }
 
     suspend fun deleteClientApiByIds(ids: List<Long>) {
-        ids.forEach { ClientApiTable.destroy(it) }
-        log.info("Deleted client-api authorizations with ids: $ids")
+        ids.forEach { deleteClientApi(it) }
     }
 
     suspend fun getClientApi(id: Long): ClientApi? {

@@ -7,6 +7,7 @@ import logic.ApiLogic
 import model.ClientApi
 import neton.core.annotations.Controller
 import neton.core.annotations.Get
+import neton.core.annotations.Permission
 import neton.core.annotations.Post
 import neton.core.annotations.Put
 import neton.core.annotations.Delete
@@ -18,6 +19,7 @@ import neton.core.annotations.Query
 class ClientApiController(private val apiLogic: ApiLogic) {
 
     @Post("/create")
+    @Permission("platform:client-api:create")
     suspend fun create(@Body request: CreateClientApiRequest): Long {
         return apiLogic.createClientApi(
             ClientApi(
@@ -30,6 +32,7 @@ class ClientApiController(private val apiLogic: ApiLogic) {
     }
 
     @Put("/update")
+    @Permission("platform:client-api:update")
     suspend fun update(@Body request: UpdateClientApiRequest) {
         apiLogic.updateClientApi(
             ClientApi(
@@ -43,27 +46,32 @@ class ClientApiController(private val apiLogic: ApiLogic) {
     }
 
     @Delete("/delete/{id}")
+    @Permission("platform:client-api:delete")
     suspend fun delete(@PathVariable id: Long) {
         apiLogic.deleteClientApi(id)
     }
 
     @Delete("/delete-list")
+    @Permission("platform:client-api:delete")
     suspend fun deleteList(@Query ids: String) {
         val idList = ids.split(",").mapNotNull { it.trim().toLongOrNull() }
         apiLogic.deleteClientApiByIds(idList)
     }
 
     @Get("/get/{id}")
+    @Permission("platform:client-api:query")
     suspend fun get(@PathVariable id: Long): ClientApi? {
         return apiLogic.getClientApi(id)
     }
 
     @Get("/byClientIdAndApiId")
+    @Permission("platform:client-api:query")
     suspend fun byClientIdAndApiId(@Query clientId: Long, @Query apiId: Long): ClientApi? {
         return apiLogic.getByClientIdAndApiId(clientId, apiId)
     }
 
     @Post("/createAssociation")
+    @Permission("platform:client-api:create")
     suspend fun createAssociation(@Body request: CreateClientApiRequest): Long {
         return apiLogic.createClientApi(
             ClientApi(
@@ -76,6 +84,7 @@ class ClientApiController(private val apiLogic: ApiLogic) {
     }
 
     @Get("/page")
+    @Permission("platform:client-api:page")
     suspend fun page(
         @Query pageNo: Int = 1,
         @Query pageSize: Int = 20,

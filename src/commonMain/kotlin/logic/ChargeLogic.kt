@@ -39,8 +39,7 @@ class ChargeLogic(
     }
 
     suspend fun deleteChargeRecordByIds(ids: List<Long>) {
-        ids.forEach { ChargeRecordTable.destroy(it) }
-        log.info("Deleted charge records with ids: $ids")
+        ids.forEach { deleteChargeRecord(it) }
     }
 
     suspend fun pageCharges(
@@ -78,8 +77,7 @@ class ChargeLogic(
     }
 
     suspend fun deletePlatformLogByIds(ids: List<Long>) {
-        ids.forEach { PlatformLogTable.destroy(it) }
-        log.info("Deleted platform logs with ids: $ids")
+        ids.forEach { deletePlatformLog(it) }
     }
 
     suspend fun pageLogs(
@@ -123,8 +121,7 @@ class ChargeLogic(
     }
 
     suspend fun deleteStatByIds(ids: List<Long>) {
-        ids.forEach { PlatformStatTable.destroy(it) }
-        log.info("Deleted platform stats with ids: $ids")
+        ids.forEach { deleteStat(it) }
     }
 
     suspend fun pageStats(

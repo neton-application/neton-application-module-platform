@@ -6,6 +6,7 @@ import logic.ChargeLogic
 import model.ChargeRecord
 import neton.core.annotations.Controller
 import neton.core.annotations.Get
+import neton.core.annotations.Permission
 import neton.core.annotations.Post
 import neton.core.annotations.Delete
 import neton.core.annotations.Body
@@ -16,6 +17,7 @@ import neton.core.annotations.Query
 class ChargeRecordController(private val chargeLogic: ChargeLogic) {
 
     @Post("/create")
+    @Permission("platform:charge:create")
     suspend fun create(@Body request: CreateChargeRecordRequest): Long {
         return chargeLogic.createChargeRecord(
             ChargeRecord(
@@ -31,22 +33,26 @@ class ChargeRecordController(private val chargeLogic: ChargeLogic) {
     }
 
     @Delete("/delete/{id}")
+    @Permission("platform:charge:delete")
     suspend fun delete(@PathVariable id: Long) {
         chargeLogic.deleteChargeRecord(id)
     }
 
     @Delete("/delete-list")
+    @Permission("platform:charge:delete")
     suspend fun deleteList(@Query ids: String) {
         val idList = ids.split(",").mapNotNull { it.trim().toLongOrNull() }
         chargeLogic.deleteChargeRecordByIds(idList)
     }
 
     @Get("/get/{id}")
+    @Permission("platform:charge:query")
     suspend fun get(@PathVariable id: Long): ChargeRecord? {
         return chargeLogic.getChargeRecord(id)
     }
 
     @Get("/page")
+    @Permission("platform:charge:page")
     suspend fun page(
         @Query pageNo: Int = 1,
         @Query pageSize: Int = 20,

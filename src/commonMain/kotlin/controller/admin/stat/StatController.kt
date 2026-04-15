@@ -7,6 +7,7 @@ import logic.ChargeLogic
 import model.PlatformStat
 import neton.core.annotations.Controller
 import neton.core.annotations.Get
+import neton.core.annotations.Permission
 import neton.core.annotations.Post
 import neton.core.annotations.Put
 import neton.core.annotations.Delete
@@ -18,6 +19,7 @@ import neton.core.annotations.Query
 class StatController(private val chargeLogic: ChargeLogic) {
 
     @Post("/create")
+    @Permission("platform:stat:create")
     suspend fun create(@Body request: CreatePlatformStatRequest): Long {
         return chargeLogic.createStat(
             PlatformStat(
@@ -31,6 +33,7 @@ class StatController(private val chargeLogic: ChargeLogic) {
     }
 
     @Put("/update")
+    @Permission("platform:stat:update")
     suspend fun update(@Body request: UpdatePlatformStatRequest) {
         chargeLogic.updateStat(
             PlatformStat(
@@ -45,22 +48,26 @@ class StatController(private val chargeLogic: ChargeLogic) {
     }
 
     @Delete("/delete/{id}")
+    @Permission("platform:stat:delete")
     suspend fun delete(@PathVariable id: Long) {
         chargeLogic.deleteStat(id)
     }
 
     @Delete("/delete-list")
+    @Permission("platform:stat:delete")
     suspend fun deleteList(@Query ids: String) {
         val idList = ids.split(",").mapNotNull { it.trim().toLongOrNull() }
         chargeLogic.deleteStatByIds(idList)
     }
 
     @Get("/get/{id}")
+    @Permission("platform:stat:query")
     suspend fun get(@PathVariable id: Long): PlatformStat? {
         return chargeLogic.getStat(id)
     }
 
     @Get("/page")
+    @Permission("platform:stat:page")
     suspend fun page(
         @Query pageNo: Int = 1,
         @Query pageSize: Int = 20,

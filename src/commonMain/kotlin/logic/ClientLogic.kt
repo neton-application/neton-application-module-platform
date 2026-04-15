@@ -29,8 +29,7 @@ class ClientLogic(
     }
 
     suspend fun deleteByIds(ids: List<Long>) {
-        ids.forEach { ClientTable.destroy(it) }
-        log.info("Deleted clients with ids: $ids")
+        ids.forEach { delete(it) }
     }
 
     suspend fun get(id: Long): Client? {
@@ -66,7 +65,11 @@ class ClientLogic(
     }
 
     fun generateAppSecret(): String {
-        val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-        return (1..48).map { chars[Random.nextInt(chars.length)] }.joinToString("")
+        // Use OS-backed CSPRNG via Random.Default.nextBytes (Kotlin/Native uses /dev/urandom)
+        val hexChars = "0123456789abcdef"
+        return Random.Default.nextBytes(36).joinToString("") { byte ->
+            val b = byte.toInt() and 0xFF
+            "${hexChars[b ushr 4]}${hexChars[b and 0x0F]}"
+        }
     }
 }
