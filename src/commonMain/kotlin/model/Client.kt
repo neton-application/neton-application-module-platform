@@ -12,6 +12,7 @@ import neton.database.annotations.UpdatedAt
 data class Client(
     @Id
     val id: Long = 0,
+    val userId: Long? = null,
     val name: String,
     val appId: String,
     val appSecret: String,

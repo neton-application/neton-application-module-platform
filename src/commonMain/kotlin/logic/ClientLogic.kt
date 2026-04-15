@@ -36,6 +36,15 @@ class ClientLogic(
         return ClientTable.get(id)
     }
 
+    suspend fun getByUserId(userId: Long): Client? {
+        return ClientTable.oneWhere {
+            and(
+                Client::userId eq userId,
+                Client::status eq 1
+            )
+        }
+    }
+
     suspend fun page(
         page: Int,
         size: Int,
