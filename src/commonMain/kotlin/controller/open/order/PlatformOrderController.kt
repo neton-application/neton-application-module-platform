@@ -134,7 +134,11 @@ class PlatformOrderController(
         // Create a charge record via ChargeLogic
         val charge = chargeLogic
         if (charge != null) {
-            val randomSuffix = Random.Default.nextBytes(4).joinToString("") { "%02x".format(it.toInt() and 0xFF) }
+            val hexChars = "0123456789abcdef"
+            val randomSuffix = Random.Default.nextBytes(4).joinToString("") { byte ->
+                val b = byte.toInt() and 0xFF
+                "${hexChars[b ushr 4]}${hexChars[b and 0x0F]}"
+            }
             val orderId = "ORD_${client.appId}_${Clock.System.now().toEpochMilliseconds()}_$randomSuffix"
             charge.createChargeRecord(ChargeRecord(
                 clientId = client.id,
