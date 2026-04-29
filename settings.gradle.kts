@@ -12,4 +12,4 @@ rootProject.name = "module-platform"
 includeBuild("../neton")
 
 // 主应用（提供 module-system）
-includeBuild("../neton-application")
+includeBuild("../privchat-application")
