@@ -1,0 +1,10 @@
+-- module-platform V002: 开放平台菜单 seed (从 dev 库导出)
+SET search_path = public;
+
+INSERT INTO system_menus (id, name, permission, type, parent_id, path, component, icon, sort, status, created_at, updated_at) VALUES (6, '开放平台', '', 1, 0, '/platform', NULL, 'ant-design:cloud-outlined', 6, 1, 0, 0) ON CONFLICT (id) DO NOTHING;
+INSERT INTO system_menus (id, name, permission, type, parent_id, path, component, icon, sort, status, created_at, updated_at) VALUES (600, 'API管理', 'platform:api:list', 2, 6, 'api', 'platform/api/index', 'ant-design:api-outlined', 1, 1, 0, 0) ON CONFLICT (id) DO NOTHING;
+INSERT INTO system_menus (id, name, permission, type, parent_id, path, component, icon, sort, status, created_at, updated_at) VALUES (601, '客户端管理', 'platform:client:list', 2, 6, 'client', 'platform/client/index', 'ant-design:desktop-outlined', 2, 1, 0, 0) ON CONFLICT (id) DO NOTHING;
+INSERT INTO system_menus (id, name, permission, type, parent_id, path, component, icon, sort, status, created_at, updated_at) VALUES (602, '客户端API', 'platform:client-api:list', 2, 6, 'client-api', 'platform/clientapi/index', 'ant-design:link-outlined', 3, 1, 0, 0) ON CONFLICT (id) DO NOTHING;
+INSERT INTO system_menus (id, name, permission, type, parent_id, path, component, icon, sort, status, created_at, updated_at) VALUES (603, '计费记录', 'platform:charge-record:list', 2, 6, 'charge-record', 'platform/chargerecord/index', 'ant-design:dollar-outlined', 4, 1, 0, 0) ON CONFLICT (id) DO NOTHING;
+INSERT INTO system_menus (id, name, permission, type, parent_id, path, component, icon, sort, status, created_at, updated_at) VALUES (604, '调用日志', 'platform:log:list', 2, 6, 'log', 'platform/log/index', 'ant-design:file-text-outlined', 5, 1, 0, 0) ON CONFLICT (id) DO NOTHING;
+INSERT INTO system_menus (id, name, permission, type, parent_id, path, component, icon, sort, status, created_at, updated_at) VALUES (605, '统计分析', 'platform:stat:list', 2, 6, 'stat', 'platform/stat/index', 'ant-design:bar-chart-outlined', 6, 1, 0, 0) ON CONFLICT (id) DO NOTHING;
