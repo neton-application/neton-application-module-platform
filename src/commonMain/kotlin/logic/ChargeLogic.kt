@@ -11,6 +11,7 @@ import neton.database.dsl.*
 
 import neton.logging.Logger
 
+@neton.core.annotations.Logic(logger = "logic.platform-charge")
 class ChargeLogic(
     private val log: Logger
 ) {

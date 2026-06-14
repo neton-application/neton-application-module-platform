@@ -6,6 +6,7 @@ import neton.database.dsl.*
 import neton.logging.Logger
 import neton.security.internal.HmacSha256
 
+@neton.core.annotations.Logic(logger = "logic.platform-auth")
 class PlatformAuthLogic(
     private val log: Logger
 ) {

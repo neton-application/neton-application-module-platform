@@ -8,6 +8,7 @@ import neton.database.dsl.*
 import neton.logging.Logger
 import kotlin.random.Random
 
+@neton.core.annotations.Logic(logger = "logic.platform-client")
 class ClientLogic(
     private val log: Logger
 ) {
