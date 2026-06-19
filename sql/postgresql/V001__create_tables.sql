@@ -1,83 +1,395 @@
--- =============================================
--- module-platform 全部建表语句 (PostgreSQL)
--- =============================================
+-- pg_dump --schema-only from dev DB (privchat-application)
+--
+-- PostgreSQL database dump
+--
 
-CREATE TABLE IF NOT EXISTS platform_clients (
-    id BIGSERIAL PRIMARY KEY,
-    name VARCHAR(128) NOT NULL,
-    app_id VARCHAR(64) NOT NULL,
-    app_secret VARCHAR(255) NOT NULL,
-    status SMALLINT NOT NULL DEFAULT 0,
-    remark VARCHAR(512),
-    contact_name VARCHAR(64),
-    contact_mobile VARCHAR(32),
-    deleted SMALLINT NOT NULL DEFAULT 0,
-    created_at BIGINT NOT NULL DEFAULT 0,
-    updated_at BIGINT NOT NULL DEFAULT 0
-);
-CREATE UNIQUE INDEX IF NOT EXISTS idx_platform_clients_app_id ON platform_clients(app_id);
+-- Dumped from database version 16.9 (Homebrew)
+-- Dumped by pg_dump version 16.9 (Homebrew)
 
-CREATE TABLE IF NOT EXISTS platform_apis (
-    id BIGSERIAL PRIMARY KEY,
-    name VARCHAR(128) NOT NULL,
-    code VARCHAR(64) NOT NULL,
-    description VARCHAR(512),
-    price BIGINT NOT NULL DEFAULT 0,
-    status SMALLINT NOT NULL DEFAULT 0,
-    created_at BIGINT NOT NULL DEFAULT 0,
-    updated_at BIGINT NOT NULL DEFAULT 0
-);
-CREATE UNIQUE INDEX IF NOT EXISTS idx_platform_apis_code ON platform_apis(code);
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
 
-CREATE TABLE IF NOT EXISTS platform_client_apis (
-    id BIGSERIAL PRIMARY KEY,
-    client_id BIGINT NOT NULL,
-    api_id BIGINT NOT NULL,
-    custom_price BIGINT,
-    status SMALLINT NOT NULL DEFAULT 0,
-    created_at BIGINT NOT NULL DEFAULT 0,
-    updated_at BIGINT NOT NULL DEFAULT 0
-);
-CREATE INDEX IF NOT EXISTS idx_platform_client_apis_client ON platform_client_apis(client_id);
-CREATE INDEX IF NOT EXISTS idx_platform_client_apis_api ON platform_client_apis(api_id);
+SET default_tablespace = '';
 
-CREATE TABLE IF NOT EXISTS platform_charge_records (
-    id BIGSERIAL PRIMARY KEY,
-    client_id BIGINT NOT NULL,
-    api_id BIGINT NOT NULL,
-    order_id VARCHAR(128),
-    api_code VARCHAR(64),
-    price BIGINT NOT NULL DEFAULT 0,
-    amount INT NOT NULL DEFAULT 0,
-    status SMALLINT NOT NULL DEFAULT 0,
-    created_at BIGINT NOT NULL DEFAULT 0
-);
-CREATE INDEX IF NOT EXISTS idx_platform_charge_records_client ON platform_charge_records(client_id);
-CREATE INDEX IF NOT EXISTS idx_platform_charge_records_order ON platform_charge_records(order_id);
+SET default_table_access_method = heap;
 
-CREATE TABLE IF NOT EXISTS platform_logs (
-    id BIGSERIAL PRIMARY KEY,
-    client_id BIGINT NOT NULL,
-    api_id BIGINT NOT NULL,
-    request_url VARCHAR(512),
-    request_params TEXT,
-    response_body TEXT,
-    user_ip VARCHAR(64),
-    duration INT NOT NULL DEFAULT 0,
-    result_code INT NOT NULL DEFAULT 0,
-    created_at BIGINT NOT NULL DEFAULT 0
-);
-CREATE INDEX IF NOT EXISTS idx_platform_logs_client ON platform_logs(client_id);
+--
+-- Name: platform_apis; Type: TABLE; Schema: public; Owner: -
+--
 
-CREATE TABLE IF NOT EXISTS platform_stats (
-    id BIGSERIAL PRIMARY KEY,
-    client_id BIGINT NOT NULL,
-    api_id BIGINT NOT NULL,
-    call_count INT NOT NULL DEFAULT 0,
-    total_charge BIGINT NOT NULL DEFAULT 0,
-    stat_date VARCHAR(16) NOT NULL,
-    created_at BIGINT NOT NULL DEFAULT 0,
-    updated_at BIGINT NOT NULL DEFAULT 0
+CREATE TABLE public.platform_apis (
+    id bigint NOT NULL,
+    name character varying(128) NOT NULL,
+    code character varying(64) NOT NULL,
+    description character varying(512),
+    price bigint DEFAULT 0 NOT NULL,
+    status smallint DEFAULT 0 NOT NULL,
+    created_at bigint DEFAULT 0 NOT NULL,
+    updated_at bigint DEFAULT 0 NOT NULL
 );
-CREATE INDEX IF NOT EXISTS idx_platform_stats_client ON platform_stats(client_id);
-CREATE INDEX IF NOT EXISTS idx_platform_stats_date ON platform_stats(stat_date);
+
+
+--
+-- Name: platform_apis_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.platform_apis_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: platform_apis_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.platform_apis_id_seq OWNED BY public.platform_apis.id;
+
+
+--
+-- Name: platform_charge_records; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.platform_charge_records (
+    id bigint NOT NULL,
+    client_id bigint NOT NULL,
+    api_id bigint NOT NULL,
+    order_id character varying(128),
+    api_code character varying(64),
+    price bigint DEFAULT 0 NOT NULL,
+    amount integer DEFAULT 0 NOT NULL,
+    status smallint DEFAULT 0 NOT NULL,
+    created_at bigint DEFAULT 0 NOT NULL
+);
+
+
+--
+-- Name: platform_charge_records_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.platform_charge_records_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: platform_charge_records_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.platform_charge_records_id_seq OWNED BY public.platform_charge_records.id;
+
+
+--
+-- Name: platform_client_apis; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.platform_client_apis (
+    id bigint NOT NULL,
+    client_id bigint NOT NULL,
+    api_id bigint NOT NULL,
+    custom_price bigint,
+    status smallint DEFAULT 0 NOT NULL,
+    created_at bigint DEFAULT 0 NOT NULL,
+    updated_at bigint DEFAULT 0 NOT NULL
+);
+
+
+--
+-- Name: platform_client_apis_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.platform_client_apis_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: platform_client_apis_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.platform_client_apis_id_seq OWNED BY public.platform_client_apis.id;
+
+
+--
+-- Name: platform_clients; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.platform_clients (
+    id bigint NOT NULL,
+    name character varying(128) NOT NULL,
+    app_id character varying(64) NOT NULL,
+    app_secret character varying(255) NOT NULL,
+    status smallint DEFAULT 0 NOT NULL,
+    remark character varying(512),
+    contact_name character varying(64),
+    contact_mobile character varying(32),
+    deleted smallint DEFAULT 0 NOT NULL,
+    created_at bigint DEFAULT 0 NOT NULL,
+    updated_at bigint DEFAULT 0 NOT NULL
+);
+
+
+--
+-- Name: platform_clients_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.platform_clients_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: platform_clients_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.platform_clients_id_seq OWNED BY public.platform_clients.id;
+
+
+--
+-- Name: platform_logs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.platform_logs (
+    id bigint NOT NULL,
+    client_id bigint NOT NULL,
+    api_id bigint NOT NULL,
+    request_url character varying(512),
+    request_params text,
+    response_body text,
+    user_ip character varying(64),
+    duration integer DEFAULT 0 NOT NULL,
+    result_code integer DEFAULT 0 NOT NULL,
+    created_at bigint DEFAULT 0 NOT NULL
+);
+
+
+--
+-- Name: platform_logs_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.platform_logs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: platform_logs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.platform_logs_id_seq OWNED BY public.platform_logs.id;
+
+
+--
+-- Name: platform_stats; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.platform_stats (
+    id bigint NOT NULL,
+    client_id bigint NOT NULL,
+    api_id bigint NOT NULL,
+    call_count integer DEFAULT 0 NOT NULL,
+    total_charge bigint DEFAULT 0 NOT NULL,
+    stat_date character varying(16) NOT NULL,
+    created_at bigint DEFAULT 0 NOT NULL,
+    updated_at bigint DEFAULT 0 NOT NULL
+);
+
+
+--
+-- Name: platform_stats_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.platform_stats_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: platform_stats_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.platform_stats_id_seq OWNED BY public.platform_stats.id;
+
+
+--
+-- Name: platform_apis id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.platform_apis ALTER COLUMN id SET DEFAULT nextval('public.platform_apis_id_seq'::regclass);
+
+
+--
+-- Name: platform_charge_records id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.platform_charge_records ALTER COLUMN id SET DEFAULT nextval('public.platform_charge_records_id_seq'::regclass);
+
+
+--
+-- Name: platform_client_apis id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.platform_client_apis ALTER COLUMN id SET DEFAULT nextval('public.platform_client_apis_id_seq'::regclass);
+
+
+--
+-- Name: platform_clients id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.platform_clients ALTER COLUMN id SET DEFAULT nextval('public.platform_clients_id_seq'::regclass);
+
+
+--
+-- Name: platform_logs id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.platform_logs ALTER COLUMN id SET DEFAULT nextval('public.platform_logs_id_seq'::regclass);
+
+
+--
+-- Name: platform_stats id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.platform_stats ALTER COLUMN id SET DEFAULT nextval('public.platform_stats_id_seq'::regclass);
+
+
+--
+-- Name: platform_apis platform_apis_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.platform_apis
+    ADD CONSTRAINT platform_apis_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: platform_charge_records platform_charge_records_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.platform_charge_records
+    ADD CONSTRAINT platform_charge_records_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: platform_client_apis platform_client_apis_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.platform_client_apis
+    ADD CONSTRAINT platform_client_apis_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: platform_clients platform_clients_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.platform_clients
+    ADD CONSTRAINT platform_clients_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: platform_logs platform_logs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.platform_logs
+    ADD CONSTRAINT platform_logs_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: platform_stats platform_stats_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.platform_stats
+    ADD CONSTRAINT platform_stats_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: idx_platform_apis_code; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_platform_apis_code ON public.platform_apis USING btree (code);
+
+
+--
+-- Name: idx_platform_charge_records_client; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_platform_charge_records_client ON public.platform_charge_records USING btree (client_id);
+
+
+--
+-- Name: idx_platform_charge_records_order; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_platform_charge_records_order ON public.platform_charge_records USING btree (order_id);
+
+
+--
+-- Name: idx_platform_client_apis_api; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_platform_client_apis_api ON public.platform_client_apis USING btree (api_id);
+
+
+--
+-- Name: idx_platform_client_apis_client; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_platform_client_apis_client ON public.platform_client_apis USING btree (client_id);
+
+
+--
+-- Name: idx_platform_clients_app_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_platform_clients_app_id ON public.platform_clients USING btree (app_id);
+
+
+--
+-- Name: idx_platform_logs_client; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_platform_logs_client ON public.platform_logs USING btree (client_id);
+
+
+--
+-- Name: idx_platform_stats_client; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_platform_stats_client ON public.platform_stats USING btree (client_id);
+
+
+--
+-- Name: idx_platform_stats_date; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_platform_stats_date ON public.platform_stats USING btree (stat_date);
+
+
+--
+-- PostgreSQL database dump complete
+--
+
