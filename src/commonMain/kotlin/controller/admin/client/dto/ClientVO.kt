@@ -62,9 +62,8 @@ data class UpdateClientRequest(
     @property:Size(min = 8, max = 64)
     val appId: String,
 
-    @property:NotBlank
     @property:Size(min = 16, max = 128)
-    val appSecret: String,
+    val appSecret: String? = null,
 
     @property:Min(0)
     @property:Max(1)

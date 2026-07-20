@@ -38,12 +38,16 @@ class ClientController(private val clientLogic: ClientLogic) {
     @Put("/update")
     @Permission("platform:client:update")
     suspend fun update(@Body request: UpdateClientRequest) {
+        val current = clientLogic.get(request.id)
+            ?: throw IllegalArgumentException("platform client id=${request.id} not found")
         clientLogic.update(
             Client(
                 id = request.id,
                 name = request.name,
                 appId = request.appId,
-                appSecret = request.appSecret,
+                // List/detail responses only expose a masked secret. Omitting the field
+                // preserves the current credential; an explicit value rotates it.
+                appSecret = request.appSecret?.takeIf { it.isNotBlank() } ?: current.appSecret,
                 status = request.status,
                 remark = request.remark,
                 contactName = request.contactName,
@@ -85,9 +89,7 @@ class ClientController(private val clientLogic: ClientLogic) {
     }
 
     private fun Client.toMaskedVO(): ClientVO {
-        val masked = appSecret?.let {
-            if (it.length > 8) it.take(8) + "****" else "****"
-        }
+        val masked = if (appSecret.length > 8) appSecret.take(8) + "****" else "****"
         return ClientVO(
             id = id,
             name = name,
