@@ -13,8 +13,8 @@ data class PlatformStatVO(
     val callCount: Long = 0,
     val totalCharge: Long = 0,
     val statDate: String? = null,
-    val createdAt: String? = null,
-    val updatedAt: String? = null
+    val createdAt: Long? = null,
+    val updatedAt: Long? = null
 )
 
 @Serializable

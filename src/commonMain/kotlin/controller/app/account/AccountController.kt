@@ -33,7 +33,7 @@ data class AccountSummaryVO(
 data class LastCallVO(
     val apiCode: String,
     val apiName: String,
-    val requestTime: String?,
+    val requestTime: Long?,
     val resultCode: Int          // 0 = success
 )
 
@@ -62,7 +62,7 @@ data class ChargeRecordVO(
     val price: Long,        // 单价（分）
     val amount: Long,       // 实际扣除（分）
     val status: Int,        // 1=成功
-    val createdAt: String?
+    val createdAt: Long?
 )
 
 @Serializable
@@ -76,7 +76,7 @@ data class PlatformLogVO(
     val userIp: String?,
     val duration: Long,     // 耗时 ms
     val resultCode: Int,    // 0=成功
-    val createdAt: String?
+    val createdAt: Long?
 )
 
 // ────────────────────────────────────────────────────────────────────────────

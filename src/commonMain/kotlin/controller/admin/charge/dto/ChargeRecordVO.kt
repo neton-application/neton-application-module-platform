@@ -10,7 +10,7 @@ data class ChargeRecordVO(
     val clientId: Long? = null,
     val apiId: Long? = null,
     val price: Long? = null,
-    val createdAt: String? = null
+    val createdAt: Long? = null
 )
 
 @Serializable

@@ -17,7 +17,7 @@ data class PlatformStat(
     val totalCharge: Long = 0,
     val statDate: String,
     @CreatedAt
-    val createdAt: String? = null,
+    val createdAt: Long? = null,
     @UpdatedAt
-    val updatedAt: String? = null
+    val updatedAt: Long? = null
 )

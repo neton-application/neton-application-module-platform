@@ -16,7 +16,7 @@ data class ClientApi(
     val customPrice: Long? = null,
     val status: Int = 1,
     @CreatedAt
-    val createdAt: String? = null,
+    val createdAt: Long? = null,
     @UpdatedAt
-    val updatedAt: String? = null
+    val updatedAt: Long? = null
 )

@@ -17,8 +17,8 @@ data class ClientVO(
     val remark: String? = null,
     val contactName: String? = null,
     val contactMobile: String? = null,
-    val createdAt: String? = null,
-    val updatedAt: String? = null
+    val createdAt: Long? = null,
+    val updatedAt: Long? = null
 )
 
 @Serializable

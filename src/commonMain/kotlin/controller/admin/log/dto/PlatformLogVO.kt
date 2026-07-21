@@ -15,7 +15,7 @@ data class PlatformLogVO(
     val userIp: String? = null,
     val duration: Long = 0,
     val resultCode: Int = 0,
-    val createdAt: String? = null
+    val createdAt: Long? = null
 )
 
 @Serializable

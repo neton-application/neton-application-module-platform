@@ -14,8 +14,8 @@ data class ApiVO(
     val description: String? = null,
     val price: Long? = null,
     val status: Int? = null,
-    val createdAt: String? = null,
-    val updatedAt: String? = null
+    val createdAt: Long? = null,
+    val updatedAt: Long? = null
 )
 
 @Serializable

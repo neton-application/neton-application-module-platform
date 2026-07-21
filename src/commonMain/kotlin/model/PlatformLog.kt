@@ -19,5 +19,5 @@ data class PlatformLog(
     val duration: Long = 0,
     val resultCode: Int = 0,
     @CreatedAt
-    val createdAt: String? = null
+    val createdAt: Long? = null
 )

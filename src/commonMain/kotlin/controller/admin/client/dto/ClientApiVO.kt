@@ -11,8 +11,8 @@ data class ClientApiVO(
     val apiId: Long? = null,
     val customPrice: Long? = null,
     val status: Int? = null,
-    val createdAt: String? = null,
-    val updatedAt: String? = null
+    val createdAt: Long? = null,
+    val updatedAt: Long? = null
 )
 
 @Serializable
