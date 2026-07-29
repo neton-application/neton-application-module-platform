@@ -4,7 +4,7 @@ import model.Client
 import table.ClientTable
 import neton.database.dsl.*
 import neton.logging.Logger
-import neton.security.internal.HmacSha256
+import neton.security.crypto.HmacSha256
 
 @neton.core.annotations.Logic(logger = "logic.platform-auth")
 class PlatformAuthLogic(
