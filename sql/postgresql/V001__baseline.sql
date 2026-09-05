@@ -445,7 +445,9 @@ WITH lvl1 AS (
 ),
 lvl2 AS (
     INSERT INTO system_menus (name, permission, type, parent_id, path, component, icon, sort, status, created_at, updated_at)
-    SELECT v.name, v.permission, v.type, p.id, v.path, v.component, v.icon, v.sort, v.status, (extract(epoch from now()) * 1000)::bigint, (extract(epoch from now()) * 1000)::bigint
+    SELECT v.name, v.permission, v.type,
+           (SELECT p.id FROM lvl1 p WHERE p.name = v.parent_name),
+           v.path, v.component, v.icon, v.sort, v.status, (extract(epoch from now()) * 1000)::bigint, (extract(epoch from now()) * 1000)::bigint
     FROM (VALUES
         ('API管理', 'platform:api:list', 2, '开放平台', 'api', 'platform/api/index', 'ant-design:api-outlined', 1, 1),
         ('客户端管理', 'platform:client:list', 2, '开放平台', 'client', 'platform/client/index', 'ant-design:desktop-outlined', 2, 1),
@@ -454,9 +456,9 @@ lvl2 AS (
         ('调用日志', 'platform:log:list', 2, '开放平台', 'log', 'platform/log/index', 'ant-design:file-text-outlined', 5, 1),
         ('统计分析', 'platform:stat:list', 2, '开放平台', 'stat', 'platform/stat/index', 'ant-design:bar-chart-outlined', 6, 1)
     ) AS v(name, permission, type, parent_name, path, component, icon, sort, status)
-    JOIN lvl1 p ON p.name = v.parent_name
     RETURNING id, name
 )
 SELECT count(*) FROM (SELECT id, name FROM lvl1
         UNION ALL SELECT id, name FROM lvl2) t;
+
 
