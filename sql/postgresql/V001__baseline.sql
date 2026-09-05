@@ -1,3 +1,25 @@
+-- platform 模块（postgresql）—— 1.0.0 beta1 合并基线。
+--
+-- 🔴 **只给全新数据库用。** 由原来的 2 个迁移脚本按执行顺序拼接而成：
+-- 顺序不变、语句不变，所以结果与逐条执行完全一致。
+--
+-- 为什么是拼接而不是导出结构快照：这些脚本里有 init_data / seed_menus 这类
+-- **种子数据**，`pg_dump --schema-only` 会把它们丢掉，而只导结构就得再手工把
+-- INSERT 补回来——那一步没有任何东西能验证对错。拼接则由构造保证等价。
+--
+-- 拼接的代价是留下了少量互相抵消的步骤（先加列、后改列）。它们无害，但**不要**
+-- 试图"顺手清理"：清理一次就等于重新引入一个没人验证过的结构。
+--
+-- 存量库怎么办：本发布不提供原地升级。Neton 的迁移器按 checksum 校验，V001 变了
+-- 就会拒绝启动——这是有意的，见 MigrationEngine 的 CHECKSUM_MISMATCH。
+--
+-- 加新东西请新增 V002、V003…，不要改这个文件。
+
+
+-- ─────────────────────────────────────────────────────────────
+-- 原 V001__create_tables.sql
+-- ─────────────────────────────────────────────────────────────
+
 -- pg_dump --schema-only from dev DB (privchat-application)
 --
 -- PostgreSQL database dump
@@ -393,3 +415,18 @@ CREATE INDEX idx_platform_stats_date ON public.platform_stats USING btree (stat_
 -- PostgreSQL database dump complete
 --
 
+
+-- ─────────────────────────────────────────────────────────────
+-- 原 V002__seed_menus.sql
+-- ─────────────────────────────────────────────────────────────
+
+-- module-platform V002: 开放平台菜单 seed (从 dev 库导出)
+SET search_path = public;
+
+INSERT INTO system_menus (id, name, permission, type, parent_id, path, component, icon, sort, status, created_at, updated_at) VALUES (6, '开放平台', '', 1, 0, '/platform', NULL, 'ant-design:cloud-outlined', 6, 1, 0, 0) ON CONFLICT (id) DO NOTHING;
+INSERT INTO system_menus (id, name, permission, type, parent_id, path, component, icon, sort, status, created_at, updated_at) VALUES (600, 'API管理', 'platform:api:list', 2, 6, 'api', 'platform/api/index', 'ant-design:api-outlined', 1, 1, 0, 0) ON CONFLICT (id) DO NOTHING;
+INSERT INTO system_menus (id, name, permission, type, parent_id, path, component, icon, sort, status, created_at, updated_at) VALUES (601, '客户端管理', 'platform:client:list', 2, 6, 'client', 'platform/client/index', 'ant-design:desktop-outlined', 2, 1, 0, 0) ON CONFLICT (id) DO NOTHING;
+INSERT INTO system_menus (id, name, permission, type, parent_id, path, component, icon, sort, status, created_at, updated_at) VALUES (602, '客户端API', 'platform:client-api:list', 2, 6, 'client-api', 'platform/clientapi/index', 'ant-design:link-outlined', 3, 1, 0, 0) ON CONFLICT (id) DO NOTHING;
+INSERT INTO system_menus (id, name, permission, type, parent_id, path, component, icon, sort, status, created_at, updated_at) VALUES (603, '计费记录', 'platform:charge-record:list', 2, 6, 'charge-record', 'platform/chargerecord/index', 'ant-design:dollar-outlined', 4, 1, 0, 0) ON CONFLICT (id) DO NOTHING;
+INSERT INTO system_menus (id, name, permission, type, parent_id, path, component, icon, sort, status, created_at, updated_at) VALUES (604, '调用日志', 'platform:log:list', 2, 6, 'log', 'platform/log/index', 'ant-design:file-text-outlined', 5, 1, 0, 0) ON CONFLICT (id) DO NOTHING;
+INSERT INTO system_menus (id, name, permission, type, parent_id, path, component, icon, sort, status, created_at, updated_at) VALUES (605, '统计分析', 'platform:stat:list', 2, 6, 'stat', 'platform/stat/index', 'ant-design:bar-chart-outlined', 6, 1, 0, 0) ON CONFLICT (id) DO NOTHING;
