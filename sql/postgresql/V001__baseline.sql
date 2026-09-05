@@ -421,12 +421,42 @@ CREATE INDEX idx_platform_stats_date ON public.platform_stats USING btree (stat_
 -- ─────────────────────────────────────────────────────────────
 
 -- module-platform V002: 开放平台菜单 seed (从 dev 库导出)
-SET search_path = public;
+SET search_path = public;-- ── 后台菜单 ──────────────────────────────────────────────────────────
+--
+-- 🔴 **不写死菜单 id**：id 由 system_menus 的序列在安装时分配。
+--
+-- 以前每个模块把 id 硬编码在 SQL 里，模块之间就得就编号达成一致，而唯一的
+-- 保护是 `ON CONFLICT (id) DO NOTHING`——撞号不会报错，只会**静默**丢菜单。
+-- 实测后果：gateway 和 privchat 撞了 700-704，于是「令牌管理」「定价修改」这些
+-- AI 网关的按钮被挂到了「用户管理」「群组管理」底下，而没有任何地方报错。
+--
+-- 现在父子关系在语句内部用**模块内唯一的菜单名**连接（同一模块内不允许重名），
+-- 跨模块不再共享任何编号，撞号从结构上不可能发生。
+--
+-- 加菜单：往对应层级的 VALUES 里加一行即可，不需要挑号。
+-- 改菜单：后续迁移按 permission 定位；若该 permission 在本模块内不唯一，
+--         用 name 加父节点定位。
 
-INSERT INTO system_menus (id, name, permission, type, parent_id, path, component, icon, sort, status, created_at, updated_at) VALUES (6, '开放平台', '', 1, 0, '/platform', NULL, 'ant-design:cloud-outlined', 6, 1, 0, 0) ON CONFLICT (id) DO NOTHING;
-INSERT INTO system_menus (id, name, permission, type, parent_id, path, component, icon, sort, status, created_at, updated_at) VALUES (600, 'API管理', 'platform:api:list', 2, 6, 'api', 'platform/api/index', 'ant-design:api-outlined', 1, 1, 0, 0) ON CONFLICT (id) DO NOTHING;
-INSERT INTO system_menus (id, name, permission, type, parent_id, path, component, icon, sort, status, created_at, updated_at) VALUES (601, '客户端管理', 'platform:client:list', 2, 6, 'client', 'platform/client/index', 'ant-design:desktop-outlined', 2, 1, 0, 0) ON CONFLICT (id) DO NOTHING;
-INSERT INTO system_menus (id, name, permission, type, parent_id, path, component, icon, sort, status, created_at, updated_at) VALUES (602, '客户端API', 'platform:client-api:list', 2, 6, 'client-api', 'platform/clientapi/index', 'ant-design:link-outlined', 3, 1, 0, 0) ON CONFLICT (id) DO NOTHING;
-INSERT INTO system_menus (id, name, permission, type, parent_id, path, component, icon, sort, status, created_at, updated_at) VALUES (603, '计费记录', 'platform:charge-record:list', 2, 6, 'charge-record', 'platform/chargerecord/index', 'ant-design:dollar-outlined', 4, 1, 0, 0) ON CONFLICT (id) DO NOTHING;
-INSERT INTO system_menus (id, name, permission, type, parent_id, path, component, icon, sort, status, created_at, updated_at) VALUES (604, '调用日志', 'platform:log:list', 2, 6, 'log', 'platform/log/index', 'ant-design:file-text-outlined', 5, 1, 0, 0) ON CONFLICT (id) DO NOTHING;
-INSERT INTO system_menus (id, name, permission, type, parent_id, path, component, icon, sort, status, created_at, updated_at) VALUES (605, '统计分析', 'platform:stat:list', 2, 6, 'stat', 'platform/stat/index', 'ant-design:bar-chart-outlined', 6, 1, 0, 0) ON CONFLICT (id) DO NOTHING;
+WITH lvl1 AS (
+    INSERT INTO system_menus (name, permission, type, parent_id, path, component, icon, sort, status, created_at, updated_at)
+    VALUES
+        ('开放平台', '', 1, 0, '/platform', NULL, 'ant-design:cloud-outlined', 6, 1, (extract(epoch from now()) * 1000)::bigint, (extract(epoch from now()) * 1000)::bigint)
+    RETURNING id, name
+),
+lvl2 AS (
+    INSERT INTO system_menus (name, permission, type, parent_id, path, component, icon, sort, status, created_at, updated_at)
+    SELECT v.name, v.permission, v.type, p.id, v.path, v.component, v.icon, v.sort, v.status, (extract(epoch from now()) * 1000)::bigint, (extract(epoch from now()) * 1000)::bigint
+    FROM (VALUES
+        ('API管理', 'platform:api:list', 2, '开放平台', 'api', 'platform/api/index', 'ant-design:api-outlined', 1, 1),
+        ('客户端管理', 'platform:client:list', 2, '开放平台', 'client', 'platform/client/index', 'ant-design:desktop-outlined', 2, 1),
+        ('客户端API', 'platform:client-api:list', 2, '开放平台', 'client-api', 'platform/clientapi/index', 'ant-design:link-outlined', 3, 1),
+        ('计费记录', 'platform:charge-record:list', 2, '开放平台', 'charge-record', 'platform/chargerecord/index', 'ant-design:dollar-outlined', 4, 1),
+        ('调用日志', 'platform:log:list', 2, '开放平台', 'log', 'platform/log/index', 'ant-design:file-text-outlined', 5, 1),
+        ('统计分析', 'platform:stat:list', 2, '开放平台', 'stat', 'platform/stat/index', 'ant-design:bar-chart-outlined', 6, 1)
+    ) AS v(name, permission, type, parent_name, path, component, icon, sort, status)
+    JOIN lvl1 p ON p.name = v.parent_name
+    RETURNING id, name
+)
+SELECT count(*) FROM (SELECT id, name FROM lvl1
+        UNION ALL SELECT id, name FROM lvl2) t;
+
