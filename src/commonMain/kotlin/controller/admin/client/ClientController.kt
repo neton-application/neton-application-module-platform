@@ -76,7 +76,7 @@ class ClientController(private val clientLogic: ClientLogic) {
     }
 
     @Get("/page")
-    @Permission("platform:client:page")
+    @Permission("platform:client:query")
     suspend fun page(
         @Query pageNo: Int = 1,
         @Query pageSize: Int = 20,

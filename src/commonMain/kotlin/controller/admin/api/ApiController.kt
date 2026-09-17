@@ -67,13 +67,13 @@ class ApiController(private val apiLogic: ApiLogic) {
     }
 
     @Get("/list")
-    @Permission("platform:api:list")
+    @Permission("platform:api:query")
     suspend fun list(): List<Api> {
         return apiLogic.list()
     }
 
     @Get("/page")
-    @Permission("platform:api:page")
+    @Permission("platform:api:query")
     suspend fun page(
         @Query pageNo: Int = 1,
         @Query pageSize: Int = 20,

@@ -67,7 +67,7 @@ class StatController(private val chargeLogic: ChargeLogic) {
     }
 
     @Get("/page")
-    @Permission("platform:stat:page")
+    @Permission("platform:stat:query")
     suspend fun page(
         @Query pageNo: Int = 1,
         @Query pageSize: Int = 20,

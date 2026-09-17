@@ -84,7 +84,7 @@ class ClientApiController(private val apiLogic: ApiLogic) {
     }
 
     @Get("/page")
-    @Permission("platform:client-api:page")
+    @Permission("platform:client-api:query")
     suspend fun page(
         @Query pageNo: Int = 1,
         @Query pageSize: Int = 20,

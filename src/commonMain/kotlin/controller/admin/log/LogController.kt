@@ -53,7 +53,7 @@ class LogController(private val chargeLogic: ChargeLogic) {
     }
 
     @Get("/page")
-    @Permission("platform:log:page")
+    @Permission("platform:log:query")
     suspend fun page(
         @Query pageNo: Int = 1,
         @Query pageSize: Int = 20,
