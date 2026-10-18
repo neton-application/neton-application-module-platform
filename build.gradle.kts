@@ -52,7 +52,19 @@ kotlin {
                 implementation(libs.kotlinx.coroutines.core)
             }
         }
+
+        commonTest {
+            dependencies {
+                implementation(kotlin("test"))
+            }
+        }
     }
+}
+
+// 业务错误 message 守卫（共享夹具，见 neton-application-contract README「测试夹具：错误 message 守卫」）。
+kotlin.sourceSets.named("macosArm64Test") { kotlin.srcDir("../neton-application-contract/src/testFixtures/kotlin") }
+tasks.withType<org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeTest>().configureEach {
+    environment("NETON_MODULE_DIR", projectDir.absolutePath)
 }
 
 dependencies {

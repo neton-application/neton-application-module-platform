@@ -1,6 +1,7 @@
 package controller.admin.client.dto
 
 import kotlinx.serialization.Serializable
+import logic.PlatformErrorCodes
 import neton.validation.annotations.Max
 import neton.validation.annotations.Min
 import neton.validation.annotations.NotBlank
@@ -45,7 +46,7 @@ data class CreateClientRequest(
     @property:Size(min = 0, max = 64)
     val contactName: String? = null,
 
-    @property:Pattern(regex = "^1\\d{10}$", message = "contactMobile format is invalid")
+    @property:Pattern(regex = "^1\\d{10}$", message = PlatformErrorCodes.CONTACT_MOBILE_INVALID)
     val contactMobile: String? = null
 )
 
@@ -75,6 +76,6 @@ data class UpdateClientRequest(
     @property:Size(min = 0, max = 64)
     val contactName: String? = null,
 
-    @property:Pattern(regex = "^1\\d{10}$", message = "contactMobile format is invalid")
+    @property:Pattern(regex = "^1\\d{10}$", message = PlatformErrorCodes.CONTACT_MOBILE_INVALID)
     val contactMobile: String? = null
 )

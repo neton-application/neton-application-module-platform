@@ -5,6 +5,7 @@ import controller.admin.client.dto.ClientVO
 import controller.admin.client.dto.UpdateClientRequest
 import dto.PageResponse
 import logic.ClientLogic
+import logic.PlatformErrorCodes
 import model.Client
 import neton.core.annotations.Controller
 import neton.core.annotations.Get
@@ -15,6 +16,7 @@ import neton.core.annotations.Delete
 import neton.core.annotations.Body
 import neton.core.annotations.PathVariable
 import neton.core.annotations.Query
+import neton.core.http.NotFoundException
 
 @Controller("/platform/client")
 class ClientController(private val clientLogic: ClientLogic) {
@@ -39,7 +41,7 @@ class ClientController(private val clientLogic: ClientLogic) {
     @Permission("platform:client:update")
     suspend fun update(@Body request: UpdateClientRequest) {
         val current = clientLogic.get(request.id)
-            ?: throw IllegalArgumentException("platform client id=${request.id} not found")
+            ?: throw NotFoundException(PlatformErrorCodes.CLIENT_NOT_FOUND)
         clientLogic.update(
             Client(
                 id = request.id,

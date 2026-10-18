@@ -12,6 +12,10 @@ import neton.core.annotations.Post
 import neton.core.annotations.Body
 import neton.core.annotations.RateLimit
 import neton.core.annotations.RateLimitScope
+import neton.core.http.HttpException
+import neton.core.http.NetonErrorCode
+import neton.core.http.ValidationError
+import logic.PlatformErrorCodes
 import kotlin.random.Random
 import kotlin.time.Clock
 
@@ -34,8 +38,6 @@ data class OrderCreateRequest(
 
 @Serializable
 data class OrderQueryResponse(
-    val code: Int = 0,
-    val message: String = "success",
     val orderId: String? = null,
     val status: String? = null,
     val amount: Long? = null
@@ -43,8 +45,6 @@ data class OrderQueryResponse(
 
 @Serializable
 data class OrderCreateResponse(
-    val code: Int = 0,
-    val message: String = "success",
     val orderId: String? = null
 )
 
@@ -56,7 +56,7 @@ class PlatformOrderController(
 
     @Get("/query")
     @AllowAnonymous
-    @RateLimit(windowSeconds = 60, maxRequests = 60, scope = RateLimitScope.IP, message = "API query rate limit exceeded")
+    @RateLimit(windowSeconds = 60, maxRequests = 60, scope = RateLimitScope.IP, message = PlatformErrorCodes.ORDER_QUERY_RATE_LIMITED)
     suspend fun query(
         appId: String,
         orderId: String? = null,
@@ -64,15 +64,8 @@ class PlatformOrderController(
         signature: String
     ): OrderQueryResponse {
         // Reject requests with stale or future timestamps (replay attack prevention)
-        val ts = timestamp.toLongOrNull()
-            ?: return OrderQueryResponse(code = 400, message = "Invalid timestamp format")
-        val nowSeconds = Clock.System.now().toEpochMilliseconds() / 1000
-        if (kotlin.math.abs(nowSeconds - ts) > 300) {
-            return OrderQueryResponse(code = 401, message = "Request expired or timestamp invalid")
-        }
-
-        val client = platformAuthLogic.lookupClient(appId)
-            ?: return OrderQueryResponse(code = 401, message = "Invalid appId")
+        checkTimestamp(timestamp)
+        val client = platformAuthLogic.lookupClient(appId) ?: throw appIdInvalid()
 
         // Parameters must be sorted alphabetically before signing to prevent ordering ambiguity.
         val params = mutableListOf("appId=$appId", "timestamp=$timestamp")
@@ -80,44 +73,32 @@ class PlatformOrderController(
         val stringToSign = params.sorted().joinToString("&")
 
         if (!platformAuthLogic.verifySignature(client.appSecret, stringToSign, signature)) {
-            return OrderQueryResponse(code = 403, message = "Signature verification failed")
+            throw signatureInvalid()
         }
 
-        // Query charge records via ChargeLogic
-        val charge = chargeLogic
-        if (charge != null && orderId != null) {
-            val record = charge.getChargeRecordByOrderId(orderId)
-            if (record != null) {
-                return OrderQueryResponse(
-                    code = 0,
-                    message = "success",
-                    orderId = record.orderId,
-                    status = if (record.status == 1) "completed" else "pending",
-                    amount = record.amount
-                )
-            }
+        val charge = chargeLogic ?: throw chargeServiceUnavailable()
+        if (orderId == null) {
+            throw HttpException(
+                NetonErrorCode.MISSING_REQUIRED_PARAM,
+                PlatformErrorCodes.ORDER_ID_REQUIRED,
+                listOf(ValidationError("orderId", PlatformErrorCodes.ORDER_ID_REQUIRED, PlatformErrorCodes.ORDER_ID_REQUIRED))
+            )
         }
-
+        val record = charge.getChargeRecordByOrderId(orderId)
+            ?: throw HttpException(NetonErrorCode.RESOURCE_NOT_FOUND, PlatformErrorCodes.ORDER_NOT_FOUND)
         return OrderQueryResponse(
-            code = 404,
-            message = "Order not found",
-            orderId = orderId
+            orderId = record.orderId,
+            status = if (record.status == 1) "completed" else "pending",
+            amount = record.amount
         )
     }
 
     @Post("/create")
     @AllowAnonymous
-    @RateLimit(windowSeconds = 60, maxRequests = 30, scope = RateLimitScope.IP, message = "API order creation rate limit exceeded")
+    @RateLimit(windowSeconds = 60, maxRequests = 30, scope = RateLimitScope.IP, message = PlatformErrorCodes.ORDER_CREATE_RATE_LIMITED)
     suspend fun create(@Body request: OrderCreateRequest): OrderCreateResponse {
-        val ts = request.timestamp.toLongOrNull()
-            ?: return OrderCreateResponse(code = 400, message = "Invalid timestamp format")
-        val nowSeconds = Clock.System.now().toEpochMilliseconds() / 1000
-        if (kotlin.math.abs(nowSeconds - ts) > 300) {
-            return OrderCreateResponse(code = 401, message = "Request expired or timestamp invalid")
-        }
-
-        val client = platformAuthLogic.lookupClient(request.appId)
-            ?: return OrderCreateResponse(code = 401, message = "Invalid appId")
+        checkTimestamp(request.timestamp)
+        val client = platformAuthLogic.lookupClient(request.appId) ?: throw appIdInvalid()
 
         // Parameters must be sorted alphabetically before signing to prevent ordering ambiguity.
         val stringToSign = listOf(
@@ -128,37 +109,60 @@ class PlatformOrderController(
         ).sorted().joinToString("&")
 
         if (!platformAuthLogic.verifySignature(client.appSecret, stringToSign, request.signature)) {
-            return OrderCreateResponse(code = 403, message = "Signature verification failed")
+            throw signatureInvalid()
         }
 
         // Create a charge record via ChargeLogic
-        val charge = chargeLogic
-        if (charge != null) {
-            val hexChars = "0123456789abcdef"
-            val randomSuffix = Random.Default.nextBytes(4).joinToString("") { byte ->
-                val b = byte.toInt() and 0xFF
-                "${hexChars[b ushr 4]}${hexChars[b and 0x0F]}"
-            }
-            val orderId = "ORD_${client.appId}_${Clock.System.now().toEpochMilliseconds()}_$randomSuffix"
-            charge.createChargeRecord(ChargeRecord(
-                clientId = client.id,
-                apiId = 0,
-                orderId = orderId,
-                apiCode = request.productCode,
-                amount = 0,
-                status = 0
-            ))
+        val charge = chargeLogic ?: throw chargeServiceUnavailable()
+        val hexChars = "0123456789abcdef"
+        val randomSuffix = Random.Default.nextBytes(4).joinToString("") { byte ->
+            val b = byte.toInt() and 0xFF
+            "${hexChars[b ushr 4]}${hexChars[b and 0x0F]}"
+        }
+        val orderId = "ORD_${client.appId}_${Clock.System.now().toEpochMilliseconds()}_$randomSuffix"
+        charge.createChargeRecord(ChargeRecord(
+            clientId = client.id,
+            apiId = 0,
+            orderId = orderId,
+            apiCode = request.productCode,
+            amount = 0,
+            status = 0
+        ))
 
-            return OrderCreateResponse(
-                code = 0,
-                message = "success",
-                orderId = orderId
+        return OrderCreateResponse(orderId = orderId)
+    }
+
+    // ─── errors ────────────────────────────────────────────────────────────
+
+    private fun checkTimestamp(timestamp: String) {
+        val ts = timestamp.toLongOrNull()
+            ?: throw HttpException(
+                NetonErrorCode.INVALID_FORMAT,
+                PlatformErrorCodes.TIMESTAMP_INVALID,
+                listOf(ValidationError("timestamp", PlatformErrorCodes.TIMESTAMP_INVALID, PlatformErrorCodes.TIMESTAMP_INVALID))
+            )
+        val nowSeconds = Clock.System.now().toEpochMilliseconds() / 1000
+        if (kotlin.math.abs(nowSeconds - ts) > 300) {
+            throw HttpException(
+                NetonErrorCode.INVALID_PARAMS,
+                PlatformErrorCodes.TIMESTAMP_EXPIRED,
+                listOf(ValidationError("timestamp", PlatformErrorCodes.TIMESTAMP_EXPIRED, PlatformErrorCodes.TIMESTAMP_EXPIRED))
             )
         }
-
-        return OrderCreateResponse(
-            code = 503,
-            message = "Charge service not available"
-        )
     }
+
+    private fun appIdInvalid() = HttpException(
+        NetonErrorCode.INVALID_CREDENTIALS,
+        PlatformErrorCodes.APP_ID_INVALID,
+        listOf(ValidationError("appId", PlatformErrorCodes.APP_ID_INVALID, PlatformErrorCodes.APP_ID_INVALID))
+    )
+
+    private fun signatureInvalid() = HttpException(
+        NetonErrorCode.INVALID_CREDENTIALS,
+        PlatformErrorCodes.SIGNATURE_INVALID,
+        listOf(ValidationError("signature", PlatformErrorCodes.SIGNATURE_INVALID, PlatformErrorCodes.SIGNATURE_INVALID))
+    )
+
+    private fun chargeServiceUnavailable() =
+        HttpException(NetonErrorCode.SERVICE_UNAVAILABLE, PlatformErrorCodes.CHARGE_SERVICE_UNAVAILABLE)
 }

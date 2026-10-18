@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 import logic.ApiLogic
 import logic.ChargeLogic
 import logic.ClientLogic
+import logic.PlatformErrorCodes
 import neton.core.annotations.*
 import neton.core.http.NotFoundException
 import neton.core.interfaces.Identity
@@ -94,7 +95,7 @@ class AccountController(
     @Get("/credentials")
     suspend fun credentials(identity: Identity): AccountCredentialVO {
         val client = clientLogic.getByUserId(identity.id.toLong())
-            ?: throw NotFoundException("No API client bound to current account")
+            ?: throw NotFoundException(PlatformErrorCodes.CLIENT_NOT_BOUND)
         return AccountCredentialVO(
             clientId = client.appId,
             clientSecret = client.appSecret,
@@ -107,7 +108,7 @@ class AccountController(
     @Get("/apis")
     suspend fun apis(identity: Identity): List<AccountApiVO> {
         val client = clientLogic.getByUserId(identity.id.toLong())
-            ?: throw NotFoundException("No API client bound to current account")
+            ?: throw NotFoundException(PlatformErrorCodes.CLIENT_NOT_BOUND)
 
         val clientApis = apiLogic.pageClientApi(1, 200, clientId = client.id, status = 1).list
         val apiIds = clientApis.map { it.apiId }.toSet()
@@ -239,9 +240,12 @@ class AccountController(
 
     /** 请求日志详情 */
     @Get("/logs/{id}")
-    suspend fun logDetail(@PathVariable id: Long): PlatformLogVO {
-        val log = chargeLogic.getPlatformLog(id)
-            ?: throw NotFoundException("Log not found: $id")
+    suspend fun logDetail(identity: Identity, @PathVariable id: Long): PlatformLogVO {
+        val client = clientLogic.getByUserId(identity.id.toLong())
+            ?: throw NotFoundException(PlatformErrorCodes.CLIENT_NOT_BOUND)
+        // 只给当前账号自己接入方的日志；别人的日志与不存在同码，不泄露存在性。
+        val log = chargeLogic.getPlatformLog(id)?.takeIf { it.clientId == client.id }
+            ?: throw NotFoundException(PlatformErrorCodes.LOG_NOT_FOUND)
         val api = apiLogic.get(log.apiId)
         return PlatformLogVO(
             id = log.id,
