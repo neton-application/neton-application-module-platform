@@ -1,0 +1,29 @@
+{
+  "release": "1.0.0-beta",
+  "module": "platform",
+  "fresh_install_only": true,
+  "dependencies": [
+    "system",
+    "infra"
+  ],
+  "baseline": [
+    {
+      "file": "V001__schema.sql",
+      "sha256": "d45ee38f4536c3033604d19d400f4706fb182f1ee6e9af77a8d01d9900dca612"
+    },
+    {
+      "file": "V002__data.sql",
+      "sha256": "9b0191e034beb1c41d7847bc77747c764cc47f1e6daa4339098cf4c10a693056"
+    }
+  ],
+  "superseded": [
+    {
+      "name": "V001__baseline.sql",
+      "sha256": "8ab3809b695a0a1ce9618fe6d116fc898bb0db4e6dc59aa12ef2e904b74c3abe"
+    },
+    {
+      "name": "V002__permission_action_unify.sql",
+      "sha256": "c475f3564644e6babb523491bd067b7ce13430fd3faa20e8e9a63e3b7eea0695"
+    }
+  ]
+}
